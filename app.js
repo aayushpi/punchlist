@@ -8,7 +8,8 @@ var express  = require( 'express' )
   , http     = require( 'http' )
   , path     = require( 'path' )
   , keys     = require('./config/secret')
-  , passport = require ( 'passport' );
+  , passport = require ( 'passport' )
+  , mongoose = require( 'mongoose' );
 
 var app = express();
 
@@ -32,6 +33,8 @@ app.configure(function(){
 
 app.configure('development', function(){
   app.use(express.errorHandler());
+  mongoose.connect('mongodb://localhost/punchlist_DEV');
+  
 });
 
 passport.serializeUser(function(user, done) {
@@ -39,10 +42,12 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(user, done) {
-    done(err, user);
+// Added null here since we don't get an error
+    done(null, user);
 });
 
 var TwitterStrategy = require('passport-twitter').Strategy;
+var UserModel = require( './models/usermodel');
 
 passport.use(new TwitterStrategy({
     // consumerKey: "w9EgrmQLQuCsqRD5fGw",
@@ -52,7 +57,7 @@ passport.use(new TwitterStrategy({
     callbackURL: "http://localhost:3000/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
-    console.log( arguments );
+    UserModel.findOneAndUpdate({ userId: profile.id }, { $set: profile }, { upsert: true }, done);
   }
 ));
 
