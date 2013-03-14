@@ -10,6 +10,7 @@ var verifyUser      = function ( req, res, next ){
 var route           = function( app ){
   app.get( '/', verifyUser, PagesController.home );
   app.get( '/login', AuthController.login );
+  app.get( '/logout', verifyUser, AuthController.logout );
 
   // Redirect the user to Twitter for authentication.  When complete, Twitter
 // will redirect the user back to the application at
